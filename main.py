@@ -4,6 +4,7 @@ import random
 
 from alien import Aliens
 from spaceship import Spaceship
+from ui import Score
 from config import *
 
 import pygame as pg
@@ -146,6 +147,11 @@ class SpaceInvaders():
 
         self.update_time_delay = 0
 
+        self.lives = 3
+        self.score = 0
+
+        self.scoreboard = Score()
+
         self.spaceship = Spaceship()
         self.aliens = Aliens()
 
@@ -157,6 +163,8 @@ class SpaceInvaders():
             update_count = self.get_update_count(dt)
             if update_count > 0:
                 self.update(update_count * UPDATE_PERIOD_MS)
+
+                self.process_collisions()
 
                 self.draw()
 
@@ -177,6 +185,8 @@ class SpaceInvaders():
     def draw(self):
         self.screen_surface.fill((0, 0, 0))
 
+        self.scoreboard.draw(self.screen_surface, self.score)
+
         self.spaceship.draw(self.screen_surface)
         self.aliens.draw(self.screen_surface)
 
@@ -189,6 +199,20 @@ class SpaceInvaders():
                 sys.exit()
             events.append(event)
         return events
+    
+    def process_collisions(self):
+        self.bullet_collisions()
+    
+    def bullet_collisions(self):
+        if not self.spaceship.bullet.active:
+            return
+        
+        for alien in self.aliens:
+            if self.spaceship.bullet.rect.colliderect(alien.rect): 
+                alien.explode()
+                self.spaceship.bullet.set_inactive()
+
+                self.score += alien.type * 10
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from config import *
 import pygame as pg
 
 
-class Spaceship():
+class Spaceship:
     def __init__(self):
         self.sprite = pg.image.load("./sprites/ship.png")
         # self.sprite = pg.transform.scale_by(pg.image.load("./sprites/ship.png"), 2)
@@ -15,6 +15,8 @@ class Spaceship():
 
         self.direction = 0
         self.firing = False
+
+        self.destroyed = False
     
     def update(self, dt, events):
         self.handle_events(events)
@@ -81,9 +83,13 @@ class Spaceship():
             return
         
         self.bullet.launch(self.rect.center)
+    
+    def destroy(self):
+        print("boom")
+        self.destroyed = True
 
 
-class Bullet():
+class Bullet:
     def __init__(self):
         self.sprite = pg.image.load("./sprites/boolet.png")
         # self.sprite = pg.transform.scale_by(pg.image.load("./sprites/boolet.png"), 2)

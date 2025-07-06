@@ -1,9 +1,38 @@
+import random
+
 from config import *
 
 import pygame as pg
 
 
-class Alien():
+class Laser:
+    def __init__(self, pos):
+        self.sprites = [pg.image.load(f"./sprites/laser{i}.png") for i in [1, 2]]
+        self.sprite_index = 0
+        self.rect = self.sprites[self.sprite_index].get_rect(center=pos)
+        self.exploded = False
+        self.direction = 1
+        self.move_amount = 0
+
+    def update(self, dt):
+        self.move(dt)
+    
+    def move(self, dt):
+        if self.exploded:
+            return
+        self.move_amount += dt / 1000 * LASER_SPEED
+        if self.move_amount > 1:
+            self.rect.y += self.direction * int(self.move_amount)
+            self.move_amount -= int(self.move_amount)
+
+    def draw(self, surface: pg.Surface):
+        surface.blit(self.sprites[self.sprite_index], self.rect)
+        self.sprite_index = (self.sprite_index + 1) % len(self.sprites)
+
+    def explode(self):
+        self.exploded = True
+
+class Alien:
     def __init__(self, type, pos):
         self.type = type
         self.sprites = [pg.image.load(f"./sprites/alien{type}_{i}.png") for i in [1, 2]]
@@ -31,11 +60,11 @@ class Alien():
             self.last_sprite_shift_delay -= SPRITE_SHIFT_PERIOD
 
     def move(self, movement):
-        self.rect.x += movement # [0]
-        # self.rect.y += movement[1]
+        self.rect.x += movement[0]
+        self.rect.y += movement[1]
 
     def fire(self):
-        pass
+        return Laser(self.rect.center)
     
     def draw(self, surface: pg.Surface):
         if self.exploded:
@@ -47,13 +76,15 @@ class Alien():
         self.exploded = True
 
 
-class Aliens():
+class Aliens:
     def __init__(self):
         self.aliens = self.init_aliens()
         self.move_amount = 0
         self.movement_speed = ALIEN_SPEED
         self.direction = 1
         self.rect = self.get_rect()
+        self.lasers = []
+        self.last_firing_time = 0
     
     def init_aliens(self):
         aliens = []
@@ -73,6 +104,10 @@ class Aliens():
         return aliens
 
     def update(self, dt):
+        self.fire(dt)
+
+        self.update_lasers(dt)
+
         self.remove_dead_aliens()
 
         movement = self.get_alien_movement(dt)
@@ -84,6 +119,48 @@ class Aliens():
 
     def __next__(self):
         return next(self.__iter__())
+    
+    def update_lasers(self, dt):
+        for laser in self.lasers:
+
+            laser.update(dt)
+
+            if laser.rect.bottom >= WORLD_SIZE[1]:
+                laser.explode()
+
+            if laser.exploded:
+                self.lasers.remove(laser)
+
+    def fire(self, dt):
+        self.last_firing_time += dt
+
+        while self.last_firing_time > LASER_FIRING_PERIOD:
+            self.last_firing_time -= LASER_FIRING_PERIOD
+
+            firing_aliens = self.get_firing_aliens()
+            if not firing_aliens:
+                return
+            
+            alien = random.choice(firing_aliens)
+            self.lasers.append(alien.fire())
+    
+    def get_firing_aliens(self):
+        xs = set(alien.rect.centerx for alien in self.aliens)
+        alien_dict = {x: [] for x in xs}
+        for alien in self.aliens:
+            alien_dict[alien.rect.centerx].append(alien)
+
+        lowest_aliens = []
+        for x in xs:
+            max_alien = None
+            max_alien_y = 0
+            for alien in alien_dict[x]:
+                if alien.rect.bottom > max_alien_y:
+                    max_alien = alien
+                    max_alien_y = alien.rect.bottom
+            if max_alien: lowest_aliens.append(max_alien)
+
+        return lowest_aliens
     
     def remove_dead_aliens(self):
         for alien in self:
@@ -105,26 +182,28 @@ class Aliens():
     def draw(self, surface: pg.Surface):
         for alien in self:
             alien.draw(surface)
+        for laser in self.lasers:
+            laser.draw(surface)
     
     def get_alien_movement(self, dt):
         self.move_amount += dt / 1000 * self.movement_speed
 
-        movement = 0 # (0, 0)
+        movement = (0, 0)
         if self.move_amount > 1:
             ps = int(self.move_amount)
-            movement = ps * self.direction
+            movement = (ps * self.direction, 0)
             self.move_amount -= ps
 
         self.rect = self.get_rect()
-        self.rect.left += movement # [0]
-        # self.rect.top += movement[1]
+        self.rect.left += movement[0]
+        self.rect.top += movement[1]
 
         if self.direction == 1 and self.rect.right >= WORLD_SIZE[0]:
-            movement = movement - (self.rect.right - WORLD_SIZE[0])
+            movement = (movement[0] - (self.rect.right - WORLD_SIZE[0]), self.aliens[0].rect.h)
             self.direction = -1
 
         if self.direction == -1 and self.rect.left <= 0:
-            movement = movement - self.rect.left
+            movement = (movement[0] - self.rect.left, self.aliens[0].rect.h)
             self.direction = 1
 
         return movement

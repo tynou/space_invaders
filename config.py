@@ -1,5 +1,7 @@
+import pygame as pg
+
 WORLD_SIZE = (400, 500)
-SCORE_POS = (100, 50)
+SCORE_POS = (5, 20)
 
 UPDATE_PERIOD = 5
 
@@ -26,3 +28,8 @@ BUNKER_POSITIONS = [
 ]
 BUNKER_EXPLOSION_RADIUS = 4
 BUNKER_DESTRUCTION_PROBABILITY = 0.8
+
+pg.init()
+COLOR_INACTIVE = pg.Color('lightskyblue3')
+COLOR_ACTIVE = pg.Color('dodgerblue2')
+FONT = pg.font.SysFont(None, 32)

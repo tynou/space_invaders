@@ -3,6 +3,20 @@ from config import *
 import pygame as pg
 
 
+class EventListener:
+    def __init__(self):
+        self.listeners = {}
+    
+    def add_event_listener(self, key, func):
+        self.listeners[key] = func
+    
+    def call(self, key):
+        if key not in self.listeners:
+            return
+        
+        self.listeners[key]()
+
+
 class Font:
     def __init__(self, scale=1):
         self.availible_letters = "абвгдежзиклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz"
@@ -62,8 +76,10 @@ class TextLabel:
     def draw(self, surface: pg.Surface):
         surface.blit(self.text_surface, (self.rect.x+5, self.rect.y+5))
 
-class TextButton:
+class TextButton(EventListener):
     def __init__(self, text, x, y, w, h, color=COLOR_WHITE):
+        super().__init__()
+
         self.rect = pg.Rect(x, y, w, h)
         self.color = color
         self.text = text
@@ -72,7 +88,8 @@ class TextButton:
     def update(self, events):
         for event in events:
             if event.type == pg.MOUSEBUTTONDOWN:
-                print("CLICKED")
+                if self.rect.collidepoint(event.pos):
+                    self.call("down")
     
     def draw(self, surface: pg.Surface):
         border_size = 2 if self.rect.collidepoint(pg.mouse.get_pos()) else 1
@@ -88,35 +105,31 @@ class InputBox:
         self.active = False
         self.font = Font(2)
 
-    def handle_event(self, event):
-        if event.type == pg.MOUSEBUTTONDOWN:
-            # If the user clicked on the input_box rect.
-            if self.rect.collidepoint(event.pos):
-                # Toggle the active variable.
-                self.active = not self.active
-            else:
-                self.active = False
-            # Change the current color of the input box.
-            self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
-        if event.type == pg.KEYDOWN:
-            if self.active:
-                if event.key == pg.K_RETURN:
-                    print(self.text)
-                    self.text = ""
-                elif event.key == pg.K_BACKSPACE:
-                    self.text = self.text[:-1]
-                elif event.key == pg.K_SPACE:
-                    self.text += " "
+    def update(self, events):
+        for event in events:
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if self.rect.collidepoint(event.pos):
+                    if not self.active:
+                        self.text = ""
+                    self.active = True
                 else:
-                    letter = event.unicode.lower()
-                    if letter not in self.font.availible_letters:
-                        return
-                    self.text += letter
-                # Re-render the text.
-                self.txt_surface = FONT.render(self.text, False, self.color)
+                    self.active = False
+                self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
+            if event.type == pg.KEYDOWN:
+                if self.active:
+                    if event.key == pg.K_BACKSPACE:
+                        self.text = self.text[:-1]
+                    elif event.key == pg.K_SPACE:
+                        self.text += " "
+                    else:
+                        letter = event.unicode.lower()
+                        if letter not in self.font.availible_letters:
+                            return
+                        self.text += letter
+        self.txt_surface = FONT.render(self.text, False, self.color)
 
-    def update(self):
-        self.rect.w = max(100, sum(self.font.get_letter_width(letter) for letter in self.text) + 10)
+    # def update(self):
+    #     self.rect.w = max(100, sum(self.font.get_letter_width(letter) for letter in self.text) + 10)
 
     def draw(self, surface: pg.Surface):
         # self.update()

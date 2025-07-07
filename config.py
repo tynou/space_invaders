@@ -32,8 +32,10 @@ BUNKER_DESTRUCTION_PROBABILITY = 0.8
 LIVES_POS = (10, WORLD_SIZE[1] - 20)
 
 pg.init()
-COLOR_INACTIVE = pg.Color('lightskyblue3')
-COLOR_ACTIVE = pg.Color('dodgerblue2')
+# COLOR_INACTIVE = pg.Color("lightskyblue3")
+# COLOR_ACTIVE = pg.Color("dodgerblue2")
+COLOR_INACTIVE = pg.Color(150, 150, 255)
+COLOR_ACTIVE = pg.Color(200, 200, 255)
 FONT = pg.font.SysFont(None, 32)
 
 COLOR_WHITE = pg.Color(255, 255, 255)

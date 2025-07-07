@@ -11,8 +11,8 @@ import pygame as pg
 
 
 class Scene:
-    def __init__(self):
-        pass
+    def __init__(self, event_handler):
+        self.event_handler = event_handler
 
     def update(self, dt, events):
         pass
@@ -22,8 +22,8 @@ class Scene:
 
 
 class Game(Scene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, event_handler):
+        super().__init__(event_handler)
 
         self.lives = 3
         self.score = 0
@@ -57,8 +57,9 @@ class Game(Scene):
         self.aliens.draw(surface)
     
     def end_game(self):
-        print("DIE")
         self.game_over = True
+
+        self.event_handler("menu")
     
     def reset(self):
         self.spaceship = Spaceship()
@@ -172,15 +173,25 @@ class Game(Scene):
 
 
 class Menu(Scene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, event_handler):
+        super().__init__(event_handler)
 
         self.title = TextLabel("space invaders", 10, 10, 200, 30)
         self.start_button = TextButton("start", 10, 50, 150, 30)
         self.leaderboard_button = TextButton("leaderboard", 10, 90, 150, 30)
+
+        self.start_button.add_event_listener("down", self.to_name_selection)
+        self.leaderboard_button.add_event_listener("down", self.to_leaderboard)
+    
+    def to_name_selection(self):
+        self.event_handler("name_selection")
+    
+    def to_leaderboard(self):
+        self.event_handler("leaderboard")
     
     def update(self, dt, events):
-        pass
+        self.start_button.update(events)
+        self.leaderboard_button.update(events)
 
     def draw(self, surface: pg.Surface):
         self.title.draw(surface)
@@ -189,25 +200,46 @@ class Menu(Scene):
 
 
 class NameSelection(Scene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, event_handler):
+        super().__init__(event_handler)
 
-        self.name = InputBox(10, 10, 200, 20, "name")
-        self.play_button = TextButton("play", 10, 50, 150, 20)
+        self.name = InputBox(10, 10, 200, 30, "username")
+        self.play_button = TextButton("play", 10, 50, 150, 30)
+        self.back_button = TextButton("back", 10, 90, 150, 30)
+
+        self.play_button.add_event_listener("down", self.to_game)
+        self.back_button.add_event_listener("down", self.to_menu)
+    
+    def to_game(self):
+        self.event_handler("game")
+    
+    def to_menu(self):
+        self.event_handler("menu")
     
     def update(self, dt, events):
-        pass
+        self.name.update(events)
+        self.play_button.update(events)
+        self.back_button.update(events)
 
     def draw(self, surface: pg.Surface):
-        pass
+        self.name.draw(surface)
+        self.play_button.draw(surface)
+        self.back_button.draw(surface)
 
 
 class LeaderboardMenu(Scene):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, event_handler):
+        super().__init__(event_handler)
+
+        self.back_button = TextButton("back", 10, 10, 150, 30)
+
+        self.back_button.add_event_listener("down", self.to_menu)
+    
+    def to_menu(self):
+        self.event_handler("menu")
     
     def update(self, dt, events):
-        pass
+        self.back_button.update(events)
 
     def draw(self, surface: pg.Surface):
-        pass
+        self.back_button.draw(surface)

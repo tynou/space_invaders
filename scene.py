@@ -1,33 +1,34 @@
-import sys
 import random
 import math
 
 from alien import Aliens
 from spaceship import Spaceship
 from bunker import Bunkers
-from ui import Score, LifeCounter, InputBox, TextLabel, TextButton
-from leaderboard import Leaderboard
-from scene import Menu, Game, NameSelection, LeaderboardMenu
+from ui import Score, LifeCounter, TextLabel, TextButton, InputBox
 from config import *
 
 import pygame as pg
 
 
-class SpaceInvaders:
+class Scene:
     def __init__(self):
-        self.screen_surface = pg.display.set_mode(WORLD_SIZE)
-        pg.display.set_caption("space invaders")
+        pass
 
-        self.scene = Menu()
+    def update(self, dt, events):
+        pass
 
-        self.update_time_delay = 0
+    def draw(self, surface: pg.Surface):
+        pass
+
+
+class Game(Scene):
+    def __init__(self):
+        super().__init__()
 
         self.lives = 3
         self.score = 0
 
         self.game_over = False
-
-        self.leaderboard = Leaderboard()
 
         self.scoreboard = Score()
         self.life_counter = LifeCounter()
@@ -35,23 +36,25 @@ class SpaceInvaders:
         self.spaceship = Spaceship()
         self.aliens = Aliens()
         self.bunkers = Bunkers()
+    
+    def update(self, dt, events):
+        if self.game_over:
+            self.reset()
 
-    def start(self):
-        clock = pg.time.Clock()
-        while True:
-            dt = clock.tick()
+        self.spaceship.update(dt, events)
+        self.aliens.update(dt)
 
-            update_count = self.get_update_count(dt)
-            if update_count > 0:
-                # if self.game_over:
-                #     self.reset()
+        self.update_lives()
+        self.process_collisions()
 
-                self.update(update_count * UPDATE_PERIOD)
+    def draw(self, surface: pg.Surface):
+        self.scoreboard.draw(surface, self.score)
+        self.life_counter.draw(surface, self.lives)
 
-                # self.update_lives()
-                # self.process_collisions()
+        self.bunkers.draw(surface)
 
-                self.draw()
+        self.spaceship.draw(surface)
+        self.aliens.draw(surface)
     
     def end_game(self):
         print("DIE")
@@ -77,45 +80,6 @@ class SpaceInvaders:
             else:
                 self.aliens.clear_lasers()
                 self.spaceship.reset()
-
-    def get_update_count(self, dt):
-        self.update_time_delay += dt
-        update_count = self.update_time_delay // UPDATE_PERIOD
-
-        self.update_time_delay %= UPDATE_PERIOD
-
-        return update_count
-    
-    def update(self, dt):
-        events = self.get_events()
-
-        self.scene.update(dt, events)
-
-        # self.spaceship.update(dt, events)
-        # self.aliens.update(dt)
-
-    def draw(self):
-        self.screen_surface.fill((0, 0, 0))
-
-        self.scene.draw(self.screen_surface)
-
-        # self.scoreboard.draw(self.screen_surface, self.score)
-        # self.life_counter.draw(self.screen_surface, self.lives)
-
-        # self.bunkers.draw(self.screen_surface)
-
-        # self.spaceship.draw(self.screen_surface)
-        # self.aliens.draw(self.screen_surface)
-
-        pg.display.flip()
-
-    def get_events(self):
-        events = []
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                sys.exit()
-            events.append(event)
-        return events
     
     def process_collisions(self):
         self.bullet_collisions()
@@ -207,7 +171,43 @@ class SpaceInvaders:
         bunker.sprite = pg.surfarray.make_surface(surf_array)
 
 
-if __name__ == "__main__":
-    pg.init()
-    game = SpaceInvaders()
-    game.start()
+class Menu(Scene):
+    def __init__(self):
+        super().__init__()
+
+        self.title = TextLabel("space invaders", 10, 10, 200, 30)
+        self.start_button = TextButton("start", 10, 50, 150, 30)
+        self.leaderboard_button = TextButton("leaderboard", 10, 90, 150, 30)
+    
+    def update(self, dt, events):
+        pass
+
+    def draw(self, surface: pg.Surface):
+        self.title.draw(surface)
+        self.start_button.draw(surface)
+        self.leaderboard_button.draw(surface)
+
+
+class NameSelection(Scene):
+    def __init__(self):
+        super().__init__()
+
+        self.name = InputBox(10, 10, 200, 20, "name")
+        self.play_button = TextButton("play", 10, 50, 150, 20)
+    
+    def update(self, dt, events):
+        pass
+
+    def draw(self, surface: pg.Surface):
+        pass
+
+
+class LeaderboardMenu(Scene):
+    def __init__(self):
+        super().__init__()
+    
+    def update(self, dt, events):
+        pass
+
+    def draw(self, surface: pg.Surface):
+        pass

@@ -69,6 +69,11 @@ class TextButton:
         self.text = text
         self.text_surface = FONT.render(text, False, self.color)
     
+    def update(self, events):
+        for event in events:
+            if event.type == pg.MOUSEBUTTONDOWN:
+                print("CLICKED")
+    
     def draw(self, surface: pg.Surface):
         border_size = 2 if self.rect.collidepoint(pg.mouse.get_pos()) else 1
         surface.blit(self.text_surface, (self.rect.x+5, self.rect.y+5))

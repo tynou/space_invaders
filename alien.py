@@ -85,6 +85,15 @@ class Aliens:
         self.rect = self.get_rect()
         self.lasers = []
         self.last_firing_time = 0
+
+    def reset(self):
+        self.aliens = self.init_aliens()
+        self.move_amount = 0
+        self.movement_speed = ALIEN_SPEED
+        self.direction = 1
+        self.rect = self.get_rect()
+        self.lasers = []
+        self.last_firing_time = 0
     
     def init_aliens(self):
         aliens = []
@@ -119,6 +128,9 @@ class Aliens:
 
     def __next__(self):
         return next(self.__iter__())
+    
+    def clear_lasers(self):
+        self.lasers = []
     
     def update_lasers(self, dt):
         for laser in self.lasers:

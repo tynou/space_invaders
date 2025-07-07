@@ -39,12 +39,47 @@ class Score:
             surface.blit(self.digit_sprites[int(digit)], rect)
             x0 += rect.w + gap
 
+class LifeCounter:
+    def __init__(self):
+        self.spaceship_sprite = pg.image.load("./sprites/ship.png")
+        self.color = pg.Color(255, 255, 255)
+        self.text = FONT.render("", False, self.color)
+
+    def draw(self, surface: pg.Surface, lives):
+        self.text = FONT.render(str(lives), False, self.color)
+        surface.blit(self.text, LIVES_POS)
+
+        for i in range(lives):
+            surface.blit(self.spaceship_sprite, (LIVES_POS[0] + 16 + 16 * i, LIVES_POS[1]))
+
+class TextLabel:
+    def __init__(self, text, x, y, w, h, color=COLOR_WHITE):
+        self.rect = pg.Rect(x, y, w, h)
+        self.color = color
+        self.text = text
+        self.text_surface = FONT.render(text, False, self.color)
+    
+    def draw(self, surface: pg.Surface):
+        surface.blit(self.text_surface, (self.rect.x+5, self.rect.y+5))
+
+class TextButton:
+    def __init__(self, text, x, y, w, h, color=COLOR_WHITE):
+        self.rect = pg.Rect(x, y, w, h)
+        self.color = color
+        self.text = text
+        self.text_surface = FONT.render(text, False, self.color)
+    
+    def draw(self, surface: pg.Surface):
+        border_size = 2 if self.rect.collidepoint(pg.mouse.get_pos()) else 1
+        surface.blit(self.text_surface, (self.rect.x+5, self.rect.y+5))
+        pg.draw.rect(surface, self.color, self.rect, border_size, 2)
+
 class InputBox:
     def __init__(self, x, y, w, h, text=""):
         self.rect = pg.Rect(x, y, w, h)
         self.color = COLOR_INACTIVE
         self.text = text
-        # self.txt_surface = FONT.render(text, True, self.color)
+        self.txt_surface = FONT.render(text, False, self.color)
         self.active = False
         self.font = Font(2)
 
@@ -73,7 +108,7 @@ class InputBox:
                         return
                     self.text += letter
                 # Re-render the text.
-                # self.txt_surface = FONT.render(self.text, True, self.color)
+                self.txt_surface = FONT.render(self.text, False, self.color)
 
     def update(self):
         self.rect.w = max(100, sum(self.font.get_letter_width(letter) for letter in self.text) + 10)
@@ -81,17 +116,18 @@ class InputBox:
     def draw(self, surface: pg.Surface):
         # self.update()
 
-        # surface.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
-        x = self.rect.x + 5
-        y = self.rect.y + 5
-        gap = 4
-        space_gap = 12
-        for letter in self.text:
-            if letter.isspace():
-                x += space_gap
-                continue
-            self.font.draw(surface, letter, x, y)
-            x += self.font.get_letter_width(letter) + gap
+        surface.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+
+        # x = self.rect.x + 5
+        # y = self.rect.y + 5
+        # gap = 4
+        # space_gap = 12
+        # for letter in self.text:
+        #     if letter.isspace():
+        #         x += space_gap
+        #         continue
+        #     self.font.draw(surface, letter, x, y)
+        #     x += self.font.get_letter_width(letter) + gap
         
         pg.draw.rect(surface, self.color, self.rect, 2)
         

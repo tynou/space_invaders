@@ -18,6 +18,17 @@ class Spaceship:
 
         self.destroyed = False
     
+    def reset(self):
+        # self.rect = self.sprite.get_rect(center=STARTING_POS)
+        self.rect.center = STARTING_POS
+        
+        self.move_amount = 0
+
+        self.direction = 0
+        self.firing = False
+
+        self.destroyed = False
+    
     def update(self, dt, events):
         self.handle_events(events)
         self.move(dt)
@@ -85,7 +96,6 @@ class Spaceship:
         self.bullet.launch(self.rect.center)
     
     def destroy(self):
-        print("boom")
         self.destroyed = True
 
 

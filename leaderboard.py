@@ -7,6 +7,8 @@ class Leaderboard:
     def __init__(self):
         self.entries = {}
         self.file_path = LEADERBOARD_FILE_PATH
+
+        self.read()
     
     def add_entry(self, username, score):
         self.entries[username] = score
@@ -15,9 +17,10 @@ class Leaderboard:
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
         
         with open(self.file_path, "a+") as file:
+            file.seek(0)
             for entry in file.readlines():
-                username, score = entry.split(":")
-                self.add_entry(username, score)
+                username, score = entry.strip().split(":")
+                self.add_entry(username, int(score))
 
     def write_to_file(self):
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)

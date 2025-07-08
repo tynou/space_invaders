@@ -5,6 +5,7 @@ from alien import Aliens
 from spaceship import Spaceship
 from bunker import Bunkers
 from ui import Score, LifeCounter, TextLabel, TextButton, InputBox
+from leaderboard import Leaderboard
 from config import *
 
 import pygame as pg
@@ -22,13 +23,17 @@ class Scene:
 
 
 class Game(Scene):
-    def __init__(self, event_handler):
+    def __init__(self, event_handler, username):
         super().__init__(event_handler)
 
         self.lives = 3
         self.score = 0
 
+        self.username = username
+
         self.game_over = False
+
+        self.leaderboard = Leaderboard()
 
         self.scoreboard = Score()
         self.life_counter = LifeCounter()
@@ -58,6 +63,9 @@ class Game(Scene):
     
     def end_game(self):
         self.game_over = True
+
+        self.leaderboard.add_entry(self.username, self.score)
+        self.leaderboard.write_to_file()
 
         self.event_handler("menu")
     
@@ -203,15 +211,16 @@ class NameSelection(Scene):
     def __init__(self, event_handler):
         super().__init__(event_handler)
 
-        self.name = InputBox(10, 10, 200, 30, "username")
-        self.play_button = TextButton("play", 10, 50, 150, 30)
-        self.back_button = TextButton("back", 10, 90, 150, 30)
+        self.name_selection_title = TextLabel("choose your name:", 10, 10, 200, 30)
+        self.name = InputBox(10, 50, 200, 30, "name")
+        self.play_button = TextButton("play", 10, 90, 150, 30)
+        self.back_button = TextButton("back", 10, 130, 150, 30)
 
         self.play_button.add_event_listener("down", self.to_game)
         self.back_button.add_event_listener("down", self.to_menu)
     
     def to_game(self):
-        self.event_handler("game")
+        self.event_handler("game", self.name.text)
     
     def to_menu(self):
         self.event_handler("menu")
@@ -222,6 +231,7 @@ class NameSelection(Scene):
         self.back_button.update(events)
 
     def draw(self, surface: pg.Surface):
+        self.name_selection_title.draw(surface)
         self.name.draw(surface)
         self.play_button.draw(surface)
         self.back_button.draw(surface)
@@ -231,9 +241,32 @@ class LeaderboardMenu(Scene):
     def __init__(self, event_handler):
         super().__init__(event_handler)
 
+        self.leaderboard = Leaderboard()
+
+        self.leaderboard_title = TextLabel("leaderboard:", 10, 50, 150, 30)
         self.back_button = TextButton("back", 10, 10, 150, 30)
 
         self.back_button.add_event_listener("down", self.to_menu)
+
+        self.leaders = self.init_list()
+    
+    def init_list(self):
+        leaders = []
+        i = 1
+        gap = 0
+        height = 30
+        start_y = 90
+        entries = sorted(self.leaderboard.entries.items(), key=lambda entry: -entry[1])
+        text_width = max(map(lambda entry: len(entry[0]) * 14, entries))
+        for username, score in entries:
+            y = start_y + (height + gap) * (i - 1)
+            leaders.append([
+                TextLabel(str(i), 10, y, 30, height),
+                TextLabel(username, 40, y, text_width, height),
+                TextLabel(str(score), text_width, y, 60, height)
+                ])
+            i += 1
+        return leaders
     
     def to_menu(self):
         self.event_handler("menu")
@@ -242,4 +275,13 @@ class LeaderboardMenu(Scene):
         self.back_button.update(events)
 
     def draw(self, surface: pg.Surface):
+        self.leaderboard_title.draw(surface)
         self.back_button.draw(surface)
+
+        for counter, username, score in self.leaders:
+            counter.draw(surface)
+            username.draw(surface)
+            score.draw(surface)
+            pg.draw.line(surface, pg.Color(255, 255, 255), counter.rect.topright, counter.rect.bottomright, 1)
+            pg.draw.line(surface, pg.Color(255, 255, 255), score.rect.topleft, score.rect.bottomleft, 1)
+            pg.draw.line(surface, pg.Color(255, 255, 255), counter.rect.bottomleft, score.rect.bottomright, 1)

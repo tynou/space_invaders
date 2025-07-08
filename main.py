@@ -1,12 +1,5 @@
 import sys
-import random
-import math
 
-from alien import Aliens
-from spaceship import Spaceship
-from bunker import Bunkers
-from ui import Score, LifeCounter, InputBox, TextLabel, TextButton
-from leaderboard import Leaderboard
 from scene import Menu, Game, NameSelection, LeaderboardMenu
 from config import *
 
@@ -17,28 +10,29 @@ class SpaceInvaders:
     def __init__(self):
         self.screen_surface = pg.display.set_mode(WORLD_SIZE)
         pg.display.set_caption("space invaders")
+        pg.display.set_icon(pg.image.load("./sprites/icon.png"))
 
         self.scene = Menu(self.handle_event)
 
         self.update_time_delay = 0
 
-        self.leaderboard = Leaderboard()
+        # self.leaderboard = Leaderboard()
     
-    def handle_event(self, event):
+    def handle_event(self, event, *args):
         match event:
             case "game":
-                self.to_game()
+                self.to_game(*args)
             case "name_selection":
-                self.to_name_selection()
+                self.to_name_selection(*args)
             case "leaderboard":
-                self.to_leaderboard()
+                self.to_leaderboard(*args)
             case "menu":
-                self.to_menu()
+                self.to_menu(*args)
             case _:
                 return
     
-    def to_game(self):
-        self.scene = Game(self.handle_event)
+    def to_game(self, username):
+        self.scene = Game(self.handle_event, username)
 
     def to_name_selection(self):
         self.scene = NameSelection(self.handle_event)

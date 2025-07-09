@@ -119,6 +119,10 @@ class Aliens:
 
         self.remove_dead_aliens()
 
+        if not self.aliens:
+            self.reset()
+            return
+
         movement = self.get_alien_movement(dt)
         for alien in self:
             alien.update(dt, movement)

@@ -101,11 +101,15 @@ class Game(Scene):
             return
         
         for alien in self.aliens:
-            if self.spaceship.bullet.rect.colliderect(alien.rect): 
+            if self.spaceship.bullet.rect.colliderect(alien.rect):
                 alien.explode()
                 self.spaceship.bullet.set_inactive()
-
                 self.score += alien.type * 10
+        
+        for laser in self.aliens.lasers:
+            if self.spaceship.bullet.rect.colliderect(laser.rect):
+                self.spaceship.bullet.explode()
+                laser.explode()
     
     def spaceship_and_alien_collisions(self):
         if self.spaceship.destroyed:

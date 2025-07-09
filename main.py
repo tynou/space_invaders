@@ -15,8 +15,6 @@ class SpaceInvaders:
         self.scene = Menu(self.handle_event)
 
         self.update_time_delay = 0
-
-        # self.leaderboard = Leaderboard()
     
     def handle_event(self, event, *args):
         match event:

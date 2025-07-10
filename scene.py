@@ -110,6 +110,16 @@ class Game(Scene):
             if self.spaceship.bullet.rect.colliderect(laser.rect):
                 self.spaceship.bullet.explode()
                 laser.explode()
+        
+        if not self.aliens.mystery_ship.active:
+            return
+        
+        if self.spaceship.bullet.rect.colliderect(self.aliens.mystery_ship.rect):
+            self.aliens.mystery_ship.explode()
+            self.spaceship.bullet.set_inactive()
+
+            self.score += 300
+
     
     def spaceship_and_alien_collisions(self):
         if self.spaceship.destroyed:
@@ -185,15 +195,17 @@ class Game(Scene):
 
 
 class Menu(Scene):
-    def __init__(self, event_handler):
+    def __init__(self, event_handler, exit_function):
         super().__init__(event_handler)
 
         self.title = TextLabel("space invaders", 10, 10, 200, 30)
         self.start_button = TextButton("start", 10, 50, 150, 30)
         self.leaderboard_button = TextButton("leaderboard", 10, 90, 150, 30)
+        self.exit_button = TextButton("exit", 10, 130, 150, 30)
 
         self.start_button.add_event_listener("down", self.to_name_selection)
         self.leaderboard_button.add_event_listener("down", self.to_leaderboard)
+        self.exit_button.add_event_listener("down", exit_function)
     
     def to_name_selection(self):
         self.event_handler("name_selection")
@@ -204,11 +216,13 @@ class Menu(Scene):
     def update(self, dt, events):
         self.start_button.update(events)
         self.leaderboard_button.update(events)
+        self.exit_button.update(events)
 
     def draw(self, surface: pg.Surface):
         self.title.draw(surface)
         self.start_button.draw(surface)
         self.leaderboard_button.draw(surface)
+        self.exit_button.draw(surface)
 
 
 class NameSelection(Scene):

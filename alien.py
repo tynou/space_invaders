@@ -32,6 +32,49 @@ class Laser:
     def explode(self):
         self.exploded = True
 
+
+class MysteryShip:
+    def __init__(self):
+        self.sprite = pg.image.load("./sprites/mystery_ship.png")
+
+        self.rect = self.sprite.get_rect()
+        self.direction = 0
+        self.move_amount = 0
+
+        self.active = False
+        self.exploded = False
+
+    def launch(self, pos, direction):
+        self.rect = self.sprite.get_rect(topleft=pos)
+        self.direction = direction
+        self.active = True
+
+        self.exploded = False
+
+    def update(self, dt):
+        self.move(dt)
+
+    def move(self, dt):
+        if self.exploded or not self.active:
+            return
+        self.move_amount += dt / 1000 * MYSTERY_SHIP_SPEED
+        if self.move_amount > 1:
+            self.rect.x += int(self.move_amount) * self.direction
+            self.move_amount -= int(self.move_amount)
+
+    def draw(self, surface: pg.Surface):
+        if not self.active:
+            return
+
+        surface.blit(self.sprite, self.rect)
+
+    def explode(self):
+        self.exploded = True
+
+    def set_inactive(self):
+        self.active = False
+
+
 class Alien:
     def __init__(self, type, pos):
         self.type = type
@@ -85,6 +128,8 @@ class Aliens:
         self.rect = self.get_rect()
         self.lasers = []
         self.last_firing_time = 0
+        self.mystery_ship = MysteryShip()
+        self.last_mystery_ship_time = 0
 
     def reset(self):
         self.aliens = self.init_aliens()
@@ -94,6 +139,7 @@ class Aliens:
         self.rect = self.get_rect()
         self.lasers = []
         self.last_firing_time = 0
+        self.last_mystery_ship_time = 0
     
     def init_aliens(self):
         aliens = []
@@ -116,6 +162,7 @@ class Aliens:
         self.fire(dt)
 
         self.update_lasers(dt)
+        self.update_mystery_ship(dt)
 
         self.remove_dead_aliens()
 
@@ -146,6 +193,31 @@ class Aliens:
 
             if laser.exploded:
                 self.lasers.remove(laser)
+    
+    def update_mystery_ship(self, dt):
+        self.last_mystery_ship_time += dt
+        if self.last_mystery_ship_time > MYSTERY_SHIP_PERIOD:
+            self.last_mystery_ship_time -= MYSTERY_SHIP_PERIOD
+            self.launch_mystery_ship()
+
+        if not self.mystery_ship.active:
+            return
+
+        self.mystery_ship.update(dt)
+
+        if self.mystery_ship.rect.x > WORLD_SIZE[0] or self.mystery_ship.rect.right < 0:
+            self.mystery_ship.set_inactive()
+
+        if self.mystery_ship.exploded:
+            self.mystery_ship.set_inactive()
+    
+    def launch_mystery_ship(self):
+        index = random.choice([0, 1])
+        x = [0, WORLD_SIZE[0] - self.mystery_ship.rect.w][index]
+        y = MYSTERY_SHIP_STARTING_Y
+        direction = [1, -1][index]
+
+        self.mystery_ship.launch((x, y), direction)
 
     def fire(self, dt):
         self.last_firing_time += dt
@@ -200,6 +272,7 @@ class Aliens:
             alien.draw(surface)
         for laser in self.lasers:
             laser.draw(surface)
+        self.mystery_ship.draw(surface)
     
     def get_alien_movement(self, dt):
         self.move_amount += dt / 1000 * self.movement_speed

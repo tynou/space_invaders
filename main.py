@@ -12,7 +12,7 @@ class SpaceInvaders:
         pg.display.set_caption("space invaders")
         pg.display.set_icon(pg.image.load("./sprites/icon.png"))
 
-        self.scene = Menu(self.handle_event)
+        self.scene = Menu(self.handle_event, self.exit)
 
         self.update_time_delay = 0
     
@@ -39,7 +39,7 @@ class SpaceInvaders:
         self.scene = LeaderboardMenu(self.handle_event)
     
     def to_menu(self):
-        self.scene = Menu(self.handle_event)
+        self.scene = Menu(self.handle_event, self.exit)
 
     def start(self):
         clock = pg.time.Clock()
@@ -51,6 +51,9 @@ class SpaceInvaders:
                 self.update(update_count * UPDATE_PERIOD)
 
                 self.draw()
+    
+    def exit(self):
+        sys.exit()
 
     def get_update_count(self, dt):
         self.update_time_delay += dt
@@ -76,7 +79,7 @@ class SpaceInvaders:
         events = []
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                sys.exit()
+                self.exit()
             events.append(event)
         return events
 

@@ -11,7 +11,7 @@ class Leaderboard:
         self.read()
     
     def add_entry(self, username, score):
-        self.entries[username] = score
+        self.entries[username] = max(self.entries[username], score) if username in self.entries else score
 
     def read(self):
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)

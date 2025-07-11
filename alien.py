@@ -80,6 +80,8 @@ class Alien:
         self.type = type
         self.sprites = [pg.image.load(f"./sprites/alien{type}_{i}.png") for i in [1, 2]]
 
+        self.destroy_sound = pg.mixer.Sound("./sounds/alien_destroyed.wav")
+
         self.move_amount = 0
         self.last_sprite_shift_delay = 0
 
@@ -117,6 +119,7 @@ class Alien:
     
     def explode(self):
         self.exploded = True
+        self.destroy_sound.play()
 
 
 class Aliens:
@@ -146,15 +149,15 @@ class Aliens:
         alien_sprites = [[pg.image.load(f"./sprites/alien{type}_{i}.png") for i in [1, 2]] for type in [1, 2, 3]]
         max_w = max([sprites[0].get_rect().w for sprites in alien_sprites])
         max_row_size = max([len(row) for row in ALIEN_FORMATION])
-        step = ALIEN_FORMATION_WIDTH_PIXELS / max_row_size
-        x0 = (-max_w) // 2 + (WORLD_SIZE[0] - ALIEN_FORMATION_WIDTH_PIXELS) // 2
+        step = ALIEN_FORMATION_WIDTH / max_row_size
+        x0 = (-max_w) // 2 + (WORLD_SIZE[0] - ALIEN_FORMATION_WIDTH) // 2
         xs = [x0 + (step * i) for i in range(max_row_size)]
         for row_index, alien_row in enumerate(ALIEN_FORMATION):
             for i, alien_index in enumerate(alien_row):
                 sprites = alien_sprites[alien_index - 1]
                 w, h = (sprites[0].get_rect().w, sprites[0].get_rect().h)
                 center_x = xs[i]
-                center_y = h + (2 * h * row_index) + ALIEN_STARTING_POS_Y
+                center_y = h + (2 * h * row_index) + ALIEN_STARTING_Y
                 aliens.append(Alien(alien_index, (center_x - w // 2, center_y - h // 2)))
         return aliens
 

@@ -9,6 +9,9 @@ class Spaceship:
         # self.sprite = pg.transform.scale_by(pg.image.load("./sprites/ship.png"), 2)
         self.rect = self.sprite.get_rect(center=STARTING_POS)
 
+        self.shoot_sound = pg.mixer.Sound("./sounds/shoot.wav")
+        self.destruction_sound = pg.mixer.Sound("./sounds/explosion.wav")
+
         self.bullet = Bullet()
 
         self.move_amount = 0
@@ -94,6 +97,7 @@ class Spaceship:
             return
         
         self.bullet.launch(self.rect.center)
+        self.shoot_sound.play()
     
     def destroy(self):
         self.destroyed = True

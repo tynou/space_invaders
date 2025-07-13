@@ -81,6 +81,7 @@ class Alien:
         self.sprites = [pg.image.load(f"./sprites/alien{type}_{i}.png") for i in [1, 2]]
 
         self.destroy_sound = pg.mixer.Sound("./sounds/alien_destroyed.wav")
+        self.destroy_sound.set_volume(0.1)
 
         self.move_amount = 0
         self.last_sprite_shift_delay = 0

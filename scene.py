@@ -26,6 +26,9 @@ class Game(Scene):
     def __init__(self, event_handler, username):
         super().__init__(event_handler)
 
+        self.soundtrack = pg.mixer.Sound("./sounds/foregone_destruction.flac")
+        self.soundtrack.play(loops=-1)
+
         self.lives = 3
         self.score = 0
 
@@ -58,14 +61,16 @@ class Game(Scene):
 
         self.bunkers.draw(surface)
 
-        self.spaceship.draw(surface)
         self.aliens.draw(surface)
+        self.spaceship.draw(surface)
     
     def end_game(self):
         self.game_over = True
 
         self.leaderboard.add_entry(self.username, self.score)
         self.leaderboard.write_to_file()
+
+        self.soundtrack.stop()
 
         self.event_handler("menu")
     
@@ -97,28 +102,28 @@ class Game(Scene):
         self.bunker_collisions()
     
     def bullet_collisions(self):
-        if not self.spaceship.bullet.active:
-            return
-        
-        for alien in self.aliens:
-            if self.spaceship.bullet.rect.colliderect(alien.rect):
-                alien.explode()
-                self.spaceship.bullet.set_inactive()
-                self.score += alien.type * 10
-        
-        for laser in self.aliens.lasers:
-            if self.spaceship.bullet.rect.colliderect(laser.rect):
-                self.spaceship.bullet.explode()
-                laser.explode()
-        
-        if not self.aliens.mystery_ship.active:
-            return
-        
-        if self.spaceship.bullet.rect.colliderect(self.aliens.mystery_ship.rect):
-            self.aliens.mystery_ship.explode()
-            self.spaceship.bullet.set_inactive()
+        for bullet in self.spaceship.bullets:
+            for alien in self.aliens:
+                if bullet.rect.colliderect(alien.rect):
+                    alien.explode()
+                    bullet.explode()
+                    self.score += alien.type * 10
 
-            self.score += 300
+                    self.spaceship.spawn_powerup(alien.rect.center)
+            
+            for laser in self.aliens.lasers:
+                if bullet.rect.colliderect(laser.rect):
+                    bullet.explode()
+                    laser.explode()
+        
+        # if not self.aliens.mystery_ship.active:
+        #     return
+        
+        # if self.spaceship.bullet.rect.colliderect(self.aliens.mystery_ship.rect):
+        #     self.aliens.mystery_ship.explode()
+        #     self.spaceship.bullet.set_inactive()
+
+        #     self.score += 300
 
     
     def spaceship_and_alien_collisions(self):
@@ -143,11 +148,9 @@ class Game(Scene):
             if self.collide_with_bunkers(laser.rect, BUNKER_EXPLOSION_RADIUS):
                 laser.explode()
         
-        if not self.spaceship.bullet.active:
-            return
-
-        if self.collide_with_bunkers(self.spaceship.bullet.rect, BUNKER_EXPLOSION_RADIUS):
-            self.spaceship.bullet.set_inactive()
+        for bullet in self.spaceship.bullets:
+            if self.collide_with_bunkers(bullet.rect, BUNKER_EXPLOSION_RADIUS):
+                bullet.explode()
     
     def collide_with_bunkers(self, rect, radius):
         for bunker in self.bunkers:

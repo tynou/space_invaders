@@ -41,7 +41,7 @@ class Game(Scene):
         self.scoreboard = Score()
         self.life_counter = LifeCounter()
 
-        self.spaceship = Spaceship()
+        self.spaceship = Spaceship(self.increment_lives)
         self.aliens = Aliens()
         self.bunkers = Bunkers()
     
@@ -63,6 +63,15 @@ class Game(Scene):
 
         self.aliens.draw(surface)
         self.spaceship.draw(surface)
+
+        self.draw_powerups(surface)
+    
+    def draw_powerups(self, surface: pg.Surface):
+        for i, powerup in enumerate(self.spaceship.current_powerups):
+            image = pg.image.load(SPRITE_PATH + POWERUP_SPRITES[powerup.type])
+            rect = image.get_rect(topleft=(100 + i * 20, 10))
+            surface.blit(image, rect)
+            pg.draw.rect(surface, pg.Color(255, 255, 255), pg.Rect(rect.left, rect.bottom + 4, rect.width * (1 - powerup.time_active / powerup.duration), 3))
     
     def end_game(self):
         self.game_over = True
@@ -84,6 +93,9 @@ class Game(Scene):
 
         self.game_over = False
     
+    def increment_lives(self):
+        self.lives += 1
+
     def update_lives(self):
         if self.spaceship.destroyed:
             if self.lives > 0:
@@ -99,7 +111,14 @@ class Game(Scene):
         self.bullet_collisions()
         self.spaceship_and_alien_collisions()
         self.spaceship_and_laser_collisions()
+        self.spaceship_and_powerup_collisions()
         self.bunker_collisions()
+    
+    def spaceship_and_powerup_collisions(self):
+        for powerup in self.spaceship.powerups:
+            if powerup.rect.colliderect(self.spaceship.rect):
+                self.spaceship.apply_powerup(powerup)
+                powerup.destroy()
     
     def bullet_collisions(self):
         for bullet in self.spaceship.bullets:
@@ -125,7 +144,6 @@ class Game(Scene):
 
         #     self.score += 300
 
-    
     def spaceship_and_alien_collisions(self):
         if self.spaceship.destroyed:
             return

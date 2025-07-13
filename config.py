@@ -1,3 +1,5 @@
+from powerup_types import PowerupTypes
+
 import pygame as pg
 
 WORLD_SIZE = (400, 500)
@@ -34,8 +36,6 @@ BUNKER_DESTRUCTION_PROBABILITY = 0.8
 LIVES_POS = (10, WORLD_SIZE[1] - 20)
 
 pg.init()
-# COLOR_INACTIVE = pg.Color("lightskyblue3")
-# COLOR_ACTIVE = pg.Color("dodgerblue2")
 COLOR_INACTIVE = pg.Color(150, 150, 255)
 COLOR_ACTIVE = pg.Color(200, 200, 255)
 FONT = pg.font.SysFont(None, 32)
@@ -47,3 +47,12 @@ LEADERBOARD_FILE_PATH = "./data/leaderboard.txt"
 MYSTERY_SHIP_SPEED = 100
 MYSTERY_SHIP_STARTING_Y = 50
 MYSTERY_SHIP_PERIOD = 20000
+
+SPRITE_PATH = "./sprites/"
+SOUND_PATH = "./sounds/"
+
+POWERUP_SPRITES = {
+    PowerupTypes.HEALTH: "health_powerup.png",
+    PowerupTypes.TRIPLE_SHOT: "bullet_powerup.png",
+    PowerupTypes.SHIELD: "shield_powerup.png",
+}

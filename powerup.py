@@ -1,16 +1,22 @@
 from config import *
 
+from powerup_types import PowerupTypes
+
 import pygame as pg
 
 
-class Powerup:
-    def __init__(self, pos):
-        self.sprite = pg.image.load("./sprites/health_powerup.png")
+class PowerupDrop:
+    def __init__(self, type, pos):
+        self.sprite = pg.image.load(SPRITE_PATH + POWERUP_SPRITES[type])
         self.rect = self.sprite.get_rect(center=pos)
+
+        self.type = type
 
         self.move_amount = 0
 
         self.direction = 1
+
+        self.active = True
     
     def update(self, dt):
         self.move(dt)
@@ -23,8 +29,20 @@ class Powerup:
 
     def draw(self, surface: pg.Surface):
         surface.fill(pg.Color(0, 0, 0), pg.Rect(self.rect.left - 5, self.rect.top - 5, self.rect.width + 10, self.rect.height + 10))
-        # pg.draw.rect(surface, pg.Color(255, 255, 255), pg.Rect(self.rect.left - 5, self.rect.top - 5, self.rect.width + 10, self.rect.height + 10))
         surface.blit(self.sprite, self.rect)
     
     def destroy(self):
-        pass
+        self.active = False
+
+
+class TripleShot:
+    def __init__(self):
+        self.type = PowerupTypes.TRIPLE_SHOT
+        self.time_active = 0
+        self.duration = 5000
+
+class Shield:
+    def __init__(self):
+        self.type = PowerupTypes.SHIELD
+        self.time_active = 0
+        self.duration = 5000

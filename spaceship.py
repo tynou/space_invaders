@@ -164,8 +164,13 @@ class Spaceship:
     def spawn_powerup(self, pos):
         self.powerups.append(PowerupDrop(random.choice(list(PowerupTypes)), pos))
     
-    def apply_powerup(self, powerup):
-        match powerup.type:
+    def apply_powerup(self, powerup_drop):
+        for powerup in self.current_powerups:
+            if powerup.type == powerup_drop.type:
+                powerup.time_active = 0
+                return
+
+        match powerup_drop.type:
             case PowerupTypes.HEALTH:
                 self.increment_lives()
             case PowerupTypes.TRIPLE_SHOT:

@@ -56,3 +56,5 @@ POWERUP_SPRITES = {
     PowerupTypes.TRIPLE_SHOT: "bullet_powerup.png",
     PowerupTypes.SHIELD: "shield_powerup.png",
 }
+
+POWERUP_DROP_CHANCE = 0.1

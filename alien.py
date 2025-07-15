@@ -134,6 +134,8 @@ class Aliens:
         self.last_firing_time = 0
         self.mystery_ship = MysteryShip()
         self.last_mystery_ship_time = 0
+        self.acceleration_step = 0
+        self.initial_alien_count = len(self.aliens)
 
     def reset(self):
         self.aliens = self.init_aliens()
@@ -144,6 +146,7 @@ class Aliens:
         self.lasers = []
         self.last_firing_time = 0
         self.last_mystery_ship_time = 0
+        self.acceleration_step = 0
     
     def init_aliens(self):
         aliens = []
@@ -164,7 +167,7 @@ class Aliens:
 
     def update(self, dt):
         self.fire(dt)
-
+        self.speed_up()
         self.update_lasers(dt)
         self.update_mystery_ship(dt)
 
@@ -183,6 +186,23 @@ class Aliens:
 
     def __next__(self):
         return next(self.__iter__())
+
+    def speed_up(self):
+
+        # If already at max speed, we leave
+        if self.acceleration_step >= 10: #len(self.move_sounds):
+            return
+
+        # Each time the total number of aliens is divided by 2, we accelerate
+        if len(self.aliens) <= self.initial_alien_count // (2 ** (self.acceleration_step + 1)):
+            self.acceleration_step += 1
+            self.movement_speed *= 2
+            # self.move_sounds[self.acceleration_step - 1].stop()
+            # self.move_sounds[self.acceleration_step].play(loops=-1)
+
+            # We accelerate the sprite shift period of alien
+            # for alien in self.alien_list:
+            #     alien.shift_sprite_period = alien.shift_sprite_period // 2
     
     def clear_lasers(self):
         self.lasers = []

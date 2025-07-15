@@ -35,6 +35,9 @@ class Game(Scene):
         self.username = username
 
         self.game_over = False
+        self.paused = False
+
+        self.pause_label = TextLabel("PAUSE", 100, 100, 200, 50, pg.Color(255, 50, 50))
 
         self.leaderboard = Leaderboard()
 
@@ -46,6 +49,11 @@ class Game(Scene):
         self.bunkers = Bunkers()
     
     def update(self, dt, events):
+        self.handle_events(events)
+
+        if self.paused:
+            return
+        
         if self.game_over:
             self.reset()
 
@@ -65,6 +73,9 @@ class Game(Scene):
         self.spaceship.draw(surface)
 
         self.draw_powerups(surface)
+
+        if self.paused:
+            self.pause_label.draw(surface)
     
     def draw_powerups(self, surface: pg.Surface):
         for i, powerup in enumerate(self.spaceship.current_powerups):
@@ -73,6 +84,11 @@ class Game(Scene):
             surface.blit(image, rect)
             pg.draw.rect(surface, pg.Color(255, 255, 255), pg.Rect(rect.left, rect.bottom + 4, rect.width * (1 - powerup.time_active / powerup.duration), 3))
     
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pg.KEYDOWN:
+                if event.key in [pg.K_p, pg.K_PAUSE]: self.paused = not self.paused
+
     def end_game(self):
         self.game_over = True
 
@@ -128,7 +144,8 @@ class Game(Scene):
                     bullet.explode()
                     self.score += alien.type * 10
 
-                    self.spaceship.spawn_powerup(alien.rect.center)
+                    if random.random() < POWERUP_DROP_CHANCE:
+                        self.spaceship.spawn_powerup(alien.rect.center)
             
             for laser in self.aliens.lasers:
                 if bullet.rect.colliderect(laser.rect):

@@ -28,7 +28,7 @@ class PowerupDrop:
             self.move_amount -= int(self.move_amount)
 
     def draw(self, surface: pg.Surface):
-        surface.fill(pg.Color(0, 0, 0), pg.Rect(self.rect.left - 5, self.rect.top - 5, self.rect.width + 10, self.rect.height + 10))
+        surface.fill(pg.Color(0, 0, 0), pg.Rect(self.rect.left, self.rect.top, self.rect.width, self.rect.height))
         surface.blit(self.sprite, self.rect)
     
     def destroy(self):
